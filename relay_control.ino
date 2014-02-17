@@ -9,8 +9,7 @@ const unsigned int RELAY6 = 6;
 const unsigned int RELAY7 = 7;
 const unsigned int DELAY = 200;
  
-void setup()
-{    
+void setup() {    
 // Initialise the Arduino data pins for OUTPUT
   pinMode(RELAY1, OUTPUT);       
   pinMode(RELAY2, OUTPUT);
@@ -49,4 +48,4 @@ void loop() {
   digitalWrite(RELAY7,LOW);
   delay(DELAY);
   digitalWrite(RELAY7,HIGH);
- }
+}

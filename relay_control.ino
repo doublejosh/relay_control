@@ -1,51 +1,88 @@
-// Relay control.
+/**
+ * Relay control of lights.
+ */
 
-const unsigned int RELAY1 = 1;
-const unsigned int RELAY2 = 2;
-const unsigned int RELAY3 = 3;
-const unsigned int RELAY4 = 4;
-const unsigned int RELAY5 = 5;
-const unsigned int RELAY6 = 6;
-const unsigned int RELAY7 = 7;
-const unsigned int DELAY = 200;
- 
-void setup() {    
-// Initialise the Arduino data pins for OUTPUT
-  pinMode(RELAY1, OUTPUT);       
-  pinMode(RELAY2, OUTPUT);
-  pinMode(RELAY3, OUTPUT);
-  pinMode(RELAY4, OUTPUT);
-  pinMode(RELAY5, OUTPUT);
-  pinMode(RELAY6, OUTPUT);
-  pinMode(RELAY7, OUTPUT);
+boolean DEBUG = true;
+
+// Pin and status storage.
+unsigned int RELAYS[][2] = {
+  {2, 1},
+  {3, 1},
+  {4, 1},
+  {5, 1},
+  {6, 1},
+  {7, 1},
+  {8, 1},
+  {9, 1}
+};
+int array_size = 8;
+
+const unsigned int DELAY = 100;
+const unsigned int CHANCE_BACK_ON = 3;
+const unsigned int CHANCE_OFF = 25;
+
+
+void setup() {
+  randomSeed(analogRead(0));
+  // Initialise the Arduino data pins for output.
+  for (int i = 1; i < array_size; i++) {
+    pinMode(RELAYS[i][0], OUTPUT);
+    digitalWrite(RELAYS[i][0], LOW);
+  }
+  if (DEBUG) {
+    Serial.begin(9600);
+  }
 }
- 
+
+
 void loop() {
-  digitalWrite(RELAY1,LOW);
-  delay(DELAY);
-  digitalWrite(RELAY1,HIGH);
 
-  digitalWrite(RELAY2,LOW);
-  delay(DELAY);
-  digitalWrite(RELAY2,HIGH);
- 
-  digitalWrite(RELAY3,LOW);
-  delay(DELAY);
-  digitalWrite(RELAY3,HIGH);
+  int change;
+  for (int i = 1; i < array_size; i++) {
 
-  digitalWrite(RELAY4,LOW);
-  delay(DELAY);
-  digitalWrite(RELAY4,HIGH);
+    if (DEBUG) {
+      Serial.print(i);
+      Serial.print(":");
+      Serial.print(RELAYS[i][1]);
+      Serial.print(":");
+    }
 
-  digitalWrite(RELAY5,LOW);
-  delay(DELAY);
-  digitalWrite(RELAY5,HIGH);
+    if (RELAYS[i][1] == 1) {
+      if (random(CHANCE_OFF) == 1) {
+        if (DEBUG) {
+          Serial.print("OFF");
+        }
+        digitalWrite(RELAYS[i][0], HIGH);
+        RELAYS[i][1] = 0;
+      }
+      else {
+        if (DEBUG) {
+          Serial.print("   ");
+        }
+      }
+    }
+    else {      
+      if (random(CHANCE_BACK_ON) == 1) {
+        if (DEBUG) {
+          Serial.print("ON ");
+        }
+        digitalWrite(RELAYS[i][0], LOW);
+        RELAYS[i][1] = 1;
+      }
+      else {
+        if (DEBUG) {
+          Serial.print("   ");
+        }
+      }
+    }
+    if (DEBUG) {
+      Serial.print("    ");
+    }
+  }
+  if (DEBUG) {
+    Serial.println("");
+  }
 
-  digitalWrite(RELAY6,LOW);
   delay(DELAY);
-  digitalWrite(RELAY6,HIGH);
-
-  digitalWrite(RELAY7,LOW);
-  delay(DELAY);
-  digitalWrite(RELAY7,HIGH);
 }
+

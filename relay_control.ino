@@ -2,7 +2,7 @@
  * Relay control of lights.
  */
 
-boolean DEBUG = true;
+boolean DEBUG = false;
 
 // Pin and status storage.
 unsigned int RELAYS[][2] = {
@@ -17,10 +17,10 @@ unsigned int RELAYS[][2] = {
 };
 int array_size = 8;
 
-const unsigned int DELAY = 100;
+const unsigned int DELAY = 50;
 const unsigned int CHANCE_BACK_ON = 3;
 const unsigned int CHANCE_OFF = 25;
-
+int current_light = 1;
 
 void setup() {
   randomSeed(analogRead(0));
@@ -35,11 +35,10 @@ void setup() {
 }
 
 
-void loop() {
+void loop() { 
 
   int change;
-  for (int i = 1; i < array_size; i++) {
-
+  for (int i = 1; i < array_size; i++) {    
     if (DEBUG) {
       Serial.print(i);
       Serial.print(":");
@@ -83,6 +82,13 @@ void loop() {
     Serial.println("");
   }
 
+  //digitalWrite(RELAYS[current_light][0], LOW);
+
   delay(DELAY);
+
+  //digitalWrite(RELAYS[current_light][0], HIGH);
+  //current_light++;
+  //if (current_light == 8) current_light = 1;
+
 }
 

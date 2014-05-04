@@ -17,11 +17,22 @@ unsigned int RELAYS[][2] = {
 };
 int array_size = 8;
 
-const unsigned int DELAY = 50;
+// Flicker.
+int flicker_delay = 100;
 const unsigned int CHANCE_BACK_ON = 3;
 const unsigned int CHANCE_OFF = 25;
 int current_light = 1;
 
+// Strobe.
+int strobe_cycle = 333;
+
+// Rotate.
+int rotate_cycle = 1000;
+int rotate_position = 1;
+
+/**
+ * Setup.
+ */
 void setup() {
   randomSeed(analogRead(0));
   // Initialise the Arduino data pins for output.
@@ -34,11 +45,53 @@ void setup() {
   }
 }
 
-
+/**
+ * Go.
+ */
 void loop() { 
+  flicker();
+  //strobe();
+  //rotate();
+}
 
-  int change;
-  for (int i = 1; i < array_size; i++) {    
+void rotate() {
+  for (int i = 1; i < array_size; i++) {
+    if (i == rotate_position) {
+      digitalWrite(RELAYS[i][0], LOW);
+    }
+    else {
+      digitalWrite(RELAYS[i][0], HIGH);
+    }
+  }
+  if (rotate_position < array_size) {
+    rotate_position++;
+  }
+  else {
+    rotate_position = 1;
+  }
+  delay(rotate_cycle / array_size);
+}
+
+/**
+ * Just flash.
+ */
+void strobe() {
+  int off_delay = strobe_cycle - 50;
+  for (int i = 1; i < array_size; i++) {
+    digitalWrite(RELAYS[i][0], HIGH);
+  }
+  delay(strobe_cycle);
+  for (int i = 1; i < array_size; i++) {
+    digitalWrite(RELAYS[i][0], LOW);
+  }
+  delay(50);
+}
+
+/**
+ * Simulate old lightbulb.
+ */
+void flicker() {
+  for (int i = 1; i < array_size; i++) {
     if (DEBUG) {
       Serial.print(i);
       Serial.print(":");
@@ -81,14 +134,6 @@ void loop() {
   if (DEBUG) {
     Serial.println("");
   }
-
-  //digitalWrite(RELAYS[current_light][0], LOW);
-
-  delay(DELAY);
-
-  //digitalWrite(RELAYS[current_light][0], HIGH);
-  //current_light++;
-  //if (current_light == 8) current_light = 1;
-
+  delay(flicker_delay);
 }
 

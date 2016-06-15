@@ -6,55 +6,77 @@ boolean DEBUG = false;
 
 // Pin and status storage.
 unsigned int RELAYS[][2] = {
-  {2, 1},
-  {3, 1},
   {4, 1},
   {5, 1},
   {6, 1},
   {7, 1},
   {8, 1},
-  {9, 1}
+  {9, 1},
+  {10, 1},
+  {11, 1}
 };
 int array_size = 8;
 
-// Flicker.
-int flicker_delay = 100;
+boolean START_OFF = 1;
+
+// Lightning.
+const unsigned int LIGHTNING_DELAY = 50;
+const unsigned int LIGHTNING_CHANCE = 2; // Out of 10000.
+const unsigned int LIGHTNING_CHANCE_BOOST = 250; // Increase while active.
+boolean LIGHTNING_ACTIVE = 0;
+boolean LIGHTNING_CALM = 1;
+
+// Flicker (simulate old lightbulb).
+int flicker_delay = 300;
 const unsigned int CHANCE_BACK_ON = 3;
-const unsigned int CHANCE_OFF = 25;
+const unsigned int CHANCE_OFF = 45;
 int current_light = 1;
 
-// Strobe.
+// Strobe (just flash).
 int strobe_cycle = 333;
 
 // Rotate.
 int rotate_cycle = 1000;
 int rotate_position = 1;
 
+
 /**
  * Setup.
  */
-void setup() {
+void setup () {
   randomSeed(analogRead(0));
   // Initialise the Arduino data pins for output.
   for (int i = 1; i < array_size; i++) {
     pinMode(RELAYS[i][0], OUTPUT);
-    digitalWrite(RELAYS[i][0], LOW);
+    if (START_OFF) {
+      digitalWrite(RELAYS[i][0], LOW);
+    }
+    else {
+      digitalWrite(RELAYS[i][0], HIGH);
+    }
+    
   }
   if (DEBUG) {
     Serial.begin(9600);
   }
 }
 
+
 /**
  * Go.
  */
-void loop() { 
-  flicker();
+void loop () {
+  lightning();
+  //flicker();
   //strobe();
   //rotate();
 }
 
-void rotate() {
+
+/**
+ * Rotate bulbs.
+ */
+void rotate () {
   for (int i = 1; i < array_size; i++) {
     if (i == rotate_position) {
       digitalWrite(RELAYS[i][0], LOW);
@@ -72,10 +94,11 @@ void rotate() {
   delay(rotate_cycle / array_size);
 }
 
+
 /**
  * Just flash.
  */
-void strobe() {
+void strobe () {
   int off_delay = strobe_cycle - 50;
   for (int i = 1; i < array_size; i++) {
     digitalWrite(RELAYS[i][0], HIGH);
@@ -87,10 +110,49 @@ void strobe() {
   delay(50);
 }
 
+
+/**
+ * Like a cloud in a storm.
+ */
+void lightning () {
+  int chance = LIGHTNING_CHANCE;
+  boolean anyOn = false;
+
+  // Turn off all lights.
+  for (int i = 0; i < array_size; i++) {
+    digitalWrite(RELAYS[i][0], HIGH);
+
+    // Increase chances for clusters.
+    if (LIGHTNING_ACTIVE) {
+      chance = LIGHTNING_CHANCE + LIGHTNING_CHANCE_BOOST;
+    }
+    else {
+      chance = LIGHTNING_CHANCE;
+    }
+
+    // Determine if flashing.
+    if (random(0, 1000) < chance) {
+      // Pick a bulb.
+      int bulb = random(1, array_size);
+      // Switch it on and keep track.
+      digitalWrite(RELAYS[bulb][0], LOW);
+      LIGHTNING_ACTIVE = 1;
+      anyOn = true;
+    }
+  }
+  
+  if (!anyOn) {
+    LIGHTNING_ACTIVE = 0;
+  }
+
+  delay(LIGHTNING_DELAY);
+}
+
+
 /**
  * Simulate old lightbulb.
  */
-void flicker() {
+void flicker () {
   for (int i = 1; i < array_size; i++) {
     if (DEBUG) {
       Serial.print(i);
